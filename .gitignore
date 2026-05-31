@@ -1,0 +1,13 @@
+# General
+.DS_Store
+.env
+
+# Backend
+backend/vendor/
+backend/.env
+backend/storage/*.key
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
