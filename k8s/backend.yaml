@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      targetPort: 9000
+      nodePort: 30080 # Proposal asks for 3080, but Minikube usually requires 30000+
+  selector:
+    app: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  [cite_start]replicas: 2 # Matches proposal baseline
+              selector:
+                matchLabels:
+                  app: backend
+              template:
+                metadata:
+                  labels:
+                    app: backend
+                spec:
+                  containers:
+                    - name: backend
+                      image: voting-backend:latest
+                      imagePullPolicy: Never
+                      resources:
+                        limits:
+                          [cite_start]cpu: "100m" # Required for HPA
+                        requests:
+                          cpu: "50m"
+                      env:
+                        - name: DB_HOST
+                          value: "mysql-service"
+                        - name: DB_DATABASE
+                          value: "voting_db"
+                        - name: DB_USERNAME
+                          value: "root"
+                        - name: DB_PASSWORD
+                          value: "root"
