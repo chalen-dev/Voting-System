@@ -270,9 +270,12 @@ export default function PollOptionsManager() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {poll?.options?.map((option: PollOption) => {
                                     const rawImage = option.image_url || option.image_path;
-                                    const finalImageSrc = rawImage?.startsWith('http')
-                                        ? rawImage
-                                        : (rawImage ? `http://localhost:8000/storage/${rawImage}` : null);
+                                    // image_url already comes back as an absolute or root-relative
+                                    // path (e.g. /storage/...). Only the bare image_path fallback
+                                    // needs the /storage prefix added.
+                                    const finalImageSrc = rawImage
+                                        ? (rawImage.startsWith('http') || rawImage.startsWith('/') ? rawImage : `/storage/${rawImage}`)
+                                        : null;
 
                                     return (
                                         <div key={option.id} className={`border ${editingId === option.id ? 'border-amber-500 bg-amber-500/5' : 'border-[var(--border-color)] bg-[var(--bg-main)]'} rounded-xl p-4 flex items-center gap-4 group transition-all ${isPollClosed ? 'hover:border-brand-500' : 'opacity-80'}`}>

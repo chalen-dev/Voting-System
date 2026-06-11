@@ -1,4 +1,15 @@
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-storage-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
@@ -77,3 +88,13 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 8
             failureThreshold: 6
+          # Shared, persistent storage for uploaded option images so every replica
+          # sees the same files and they survive pod restarts/scaling. On a
+          # single-node Minikube cluster a ReadWriteOnce volume is fine for all pods.
+          volumeMounts:
+            - name: option-images
+              mountPath: /var/www/storage/app/public
+      volumes:
+        - name: option-images
+          persistentVolumeClaim:
+            claimName: backend-storage-pvc

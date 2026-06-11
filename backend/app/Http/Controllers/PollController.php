@@ -212,7 +212,7 @@ class PollController extends Controller
     private function appendImageUrl($option): void
     {
         $option->image_url = $option->image_path
-            ? asset('storage/' . $option->image_path)
+            ? '/storage/' . $option->image_path
             : null;
     }
 }

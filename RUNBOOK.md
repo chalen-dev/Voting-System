@@ -29,20 +29,19 @@ You need: Docker Desktop running, `minikube`, `kubectl`, and a load tool (`hey`)
 docker version ; minikube version ; kubectl version --client
 ```
 
-Install `hey` if needed. It is **not** on the Chocolatey community repo
-(`choco install hey` fails); use one of these instead:
+Install `hey`. Note: `choco install hey` does NOT work (not in the repo), and the
+old S3 download link is dead (403). The reliable way is to build it with Go:
 
 ```powershell
-# Option A — download the official prebuilt binary (no toolchain needed)
-Invoke-WebRequest -Uri "https://hey-release.s3.us-east-2.amazonaws.com/hey_windows_amd64" -OutFile "$env:USERPROFILE\hey.exe"
-# then call it as:  & "$env:USERPROFILE\hey.exe" ...
-
-# Option B — if you have Go installed
-go install github.com/rakyll/hey@latest    # binary: $env:USERPROFILE\go\bin\hey.exe
+go install github.com/rakyll/hey@latest
+# This produces:  $env:USERPROFILE\go\bin\hey.exe
+# Run it with the full path, e.g.:
+#   & "$env:USERPROFILE\go\bin\hey.exe" -z 3m -c 50 "<url>"
 ```
 
-**Option C — no install at all.** A pure-PowerShell load generator (less precise
-than `hey`, but enough to trigger the HPA) is provided inline in **Step 7**.
+**No Go installed?** Skip `hey` entirely — a pure-PowerShell load generator that
+does the same job is provided inline in **Step 7** (Option C). You do not need
+`hey` to run the demo.
 
 ---
 
@@ -144,9 +143,9 @@ kubectl get pods -l app=backend -w
 **Terminal B** — hammer the endpoint (`$BACKEND` = the backend-service URL from Step 6):
 
 ```powershell
-$BACKEND = (minikube service backend-service --url)
-hey -n 10000 -c 100 "$BACKEND/api/heavy"
-# if you downloaded the binary:  & "$env:USERPROFILE\hey.exe" -n 10000 -c 100 "$BACKEND/api/heavy"
+# $BACKEND = the URL printed by `minikube service backend-service --url`
+$BACKEND = "http://127.0.0.1:XXXXX"     # paste the actual port
+& "$env:USERPROFILE\go\bin\hey.exe" -z 3m -c 50 "$BACKEND/api/heavy"
 ```
 
 **No-install alternative (Option C) — pure PowerShell, ~10,000 requests / 100 parallel:**

@@ -24,9 +24,20 @@ WORKDIR /var/www
 # Copy files
 COPY . .
 
-# Install dependencies
-RUN composer install --no-scripts --no-autoloader
-RUN composer dump-autoload
+# Install dependencies.
+#  --no-dev      : skip dev-only packages (pint, phpunit, etc.) not needed to run —
+#                  this also avoids the flaky laravel/pint download that was failing.
+#  PARALLEL_HTTP : 1 download at a time, dodging the HTTP/2 "stream CANCEL" errors
+#                  that happen when many parallel downloads run over a shaky network.
+ENV COMPOSER_MAX_PARALLEL_HTTP=1
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN composer dump-autoload --no-dev --optimize
+
+# Expose uploaded files publicly via the public/storage -> storage/app/public symlink.
+# The repo ships an empty public/storage DIRECTORY which blocks storage:link from
+# creating the symlink, so remove it first, then create the link explicitly.
+RUN rm -rf /var/www/public/storage \
+    && ln -s /var/www/storage/app/public /var/www/public/storage
 
 # Delete .env and ALL caches so it MUST use Kubernetes Env Vars
 RUN rm -rf .env .env.example bootstrap/cache/*.php

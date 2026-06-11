@@ -134,7 +134,7 @@ class OptionController extends Controller
     private function appendImageUrl(Option $option): Option
     {
         $option->image_url = $option->image_path
-            ? asset('storage/' . $option->image_path)
+            ? '/storage/' . $option->image_path
             : null;
 
         return $option;

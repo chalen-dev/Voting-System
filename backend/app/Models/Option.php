@@ -37,8 +37,10 @@ class Option extends Model
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 // If image_path exists, return the full public URL, otherwise null
+                // Relative path so it works behind any host (the frontend's nginx
+                // proxies /storage/* to this backend). Avoids hardcoding a hostname.
                 return !empty($attributes['image_path'])
-                    ? asset('storage/' . $attributes['image_path'])
+                    ? '/storage/' . $attributes['image_path']
                     : null;
             }
         );
