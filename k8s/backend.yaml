@@ -35,7 +35,10 @@ spec:
               cpu: "50m"
           env:
             - name: APP_KEY
-              value: "base64:R6I/HxdTx9AQ7g/6uSJ1afs1qNsrMo8Qic7tRBeciGg="
+              valueFrom:
+                secretKeyRef:
+                  name: voting-secrets
+                  key: APP_KEY
             - name: APP_DEBUG
               value: "true"
             - name: DB_CONNECTION
@@ -49,6 +52,28 @@ spec:
             - name: DB_USERNAME
               value: "root"
             - name: DB_PASSWORD
-              value: "root"
+              valueFrom:
+                secretKeyRef:
+                  name: voting-secrets
+                  key: DB_PASSWORD
+            - name: VOTE_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: voting-secrets
+                  key: VOTE_SALT
           ports:
             - containerPort: 9000
+          # Readiness gate only: ensures traffic is withheld until Laravel has
+          # booted (clean rollouts, no 502s). A liveness probe is intentionally
+          # omitted here because `php artisan serve` is single-threaded, so a
+          # pod that is busy serving an /api/heavy stress request would fail a
+          # liveness check and be killed mid-test. Self-healing on real pod loss
+          # is still handled by the Deployment/ReplicaSet controller.
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 6

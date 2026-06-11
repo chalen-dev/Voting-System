@@ -64,8 +64,8 @@ class VoteController extends Controller
             return response()->json(['message' => 'Option does not belong to this poll.'], 422);
         }
 
-        // Check duplicate vote by IP
-        $ipHash = hash('sha256', $request->ip());
+        // Check duplicate vote by IP (salted SHA-256 to preserve anonymity)
+        $ipHash = hash('sha256', $request->ip() . config('voting.ip_salt'));
         $existingVote = Vote::where('poll_uuid', $validated['poll_uuid'])
             ->where('ip_hash', $ipHash)
             ->first();

@@ -1,0 +1,13 @@
+# Dependencies and build output are regenerated inside the image
+# (npm install + npm run build), so never ship them in the build context.
+node_modules
+dist
+
+# VCS / local noise
+.git
+.gitignore
+*.log
+npm-debug.log*
+
+# NOTE: .env / .env.production are intentionally NOT ignored — Vite reads
+# VITE_API_URL from them at build time (see RUNBOOK.md Step 3).

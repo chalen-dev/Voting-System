@@ -37,7 +37,10 @@ spec:
           image: mysql:8.0
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: "root"
+              valueFrom:
+                secretKeyRef:
+                  name: voting-secrets
+                  key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_DATABASE
               value: "voting_db"
           ports:
@@ -45,6 +48,16 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 20
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:

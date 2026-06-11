@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\PersonalAccessTokenController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\StressController;
 use App\Http\Controllers\VoteController;
 use App\Http\Middleware\AuthTokenMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,9 @@ Route::post('/votes', [VoteController::class, 'store']);
 
 // Typically used to show live results to the public
 Route::get('/votes', [VoteController::class, 'index']);
+
+// Synthetic CPU load generator for stress testing / HPA evaluation
+Route::get('/heavy', [StressController::class, 'heavy']);
 
 
 /*

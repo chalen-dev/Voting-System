@@ -1,0 +1,13 @@
+# Regenerated inside the image by composer install, so don't ship them.
+vendor
+node_modules
+
+# The Dockerfile deletes .env and runs on Kubernetes env vars instead.
+.env
+.env.example
+
+# VCS / local noise
+.git
+.gitignore
+*.log
+storage/logs/*
